@@ -26,7 +26,7 @@
             var visitor = new ODataQueryExpressionVisitor(metadata);
             visitor.Visit(query);
 
-            var url = $"/api/data/v9.0/{metadata.ExternalCollectionName}?{visitor.QueryString}";
+            var url = $"{_dataSource.GetAttributeValue<string>("bg_resource")}/{metadata.ExternalCollectionName}?{visitor.QueryString}";
 
             var records = GetResponse<Records>(GetRequest("GET", url, query.PageInfo?.Count ?? 0));
 
@@ -58,7 +58,7 @@
         {
             var metadata = _service.GetEntityMetadata(reference.LogicalName);
 
-            var url = $"/api/data/v9.0/{metadata.ExternalCollectionName}({reference.Id.ToString("D")})";
+            var url = $"{_dataSource.GetAttributeValue<string>("bg_resource")}/{metadata.ExternalCollectionName}({reference.Id.ToString("D")})";
 
             var record = GetResponse<Record>(GetRequest("GET", url));
 

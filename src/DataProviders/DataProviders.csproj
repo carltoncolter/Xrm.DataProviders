@@ -9,8 +9,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>BGuidinger.Xrm.DataProviders</RootNamespace>
     <AssemblyName>BGuidinger.Xrm.DataProviders</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -38,16 +39,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Crm.Sdk.Proxy, Version=9.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.CrmSdk.CoreAssemblies.9.0.2.3\lib\net452\Microsoft.Crm.Sdk.Proxy.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\..\packages\Microsoft.CrmSdk.CoreAssemblies.9.0.2.22\lib\net462\Microsoft.Crm.Sdk.Proxy.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Xrm.Sdk, Version=9.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.CrmSdk.CoreAssemblies.9.0.2.3\lib\net452\Microsoft.Xrm.Sdk.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\..\packages\Microsoft.CrmSdk.CoreAssemblies.9.0.2.22\lib\net462\Microsoft.Xrm.Sdk.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Xrm.Sdk.Data, Version=9.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.CrmSdk.Data.9.0.2.3\lib\net452\Microsoft.Xrm.Sdk.Data.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\..\packages\Microsoft.CrmSdk.Data.9.0.2.22\lib\net462\Microsoft.Xrm.Sdk.Data.dll</HintPath>
     </Reference>
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
@@ -74,18 +72,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Providers\Dynamics365\Extensions.cs" />
+    <Compile Include="Providers\PasswordProtected\Extensions.cs" />
     <Compile Include="Base\Interfaces\IDataService.cs" />
     <Compile Include="Base\RetrieveMultipleBase.cs" />
     <Compile Include="Base\RetrieveBase.cs" />
-    <Compile Include="Providers\Dynamics365\Models\Record.cs" />
-    <Compile Include="Providers\Dynamics365\Models\Records.cs" />
-    <Compile Include="Providers\Dynamics365\Models\Token.cs" />
+    <Compile Include="Providers\PasswordProtected\Models\Record.cs" />
+    <Compile Include="Providers\PasswordProtected\Models\Records.cs" />
+    <Compile Include="Providers\PasswordProtected\Models\Token.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Providers\Dynamics365\Services\DataService.cs" />
-    <Compile Include="Providers\Dynamics365\Retrieve.cs" />
-    <Compile Include="Providers\Dynamics365\RetrieveMultiple.cs" />
-    <Compile Include="Providers\Dynamics365\Visitors\ODataQueryExpressionVisitor.cs" />
+    <Compile Include="Providers\PasswordProtected\Services\DataService.cs" />
+    <Compile Include="Providers\PasswordProtected\Retrieve.cs" />
+    <Compile Include="Providers\PasswordProtected\RetrieveMultiple.cs" />
+    <Compile Include="Providers\PasswordProtected\Visitors\ODataQueryExpressionVisitor.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="key.snk" />
