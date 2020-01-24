@@ -1,29 +1,21 @@
-﻿namespace BGuidinger.Xrm.DataProviders
+﻿using System;
+using CustomDataProviders.Interfaces;
+using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Sdk.Extensions;
+using Microsoft.Xrm.Sdk.Query;
+
+namespace CustomDataProviders
 {
-    using System;
-    using Microsoft.Xrm.Sdk;
-    using Microsoft.Xrm.Sdk.Extensions;
-    using Microsoft.Xrm.Sdk.Query;
-
-    public abstract class RetrieveMultipleBase : IPlugin
+    public abstract class RetrieveMultipleBase : PluginBase
     {
-        public void Execute(IServiceProvider serviceProvider)
+        public override void Run()
         {
-            var context = serviceProvider.Get<IPluginExecutionContext>();
-            var service = serviceProvider.GetOrganizationService(Guid.Empty);
+            var query = PluginExecutionContext.InputParameterOrDefault<QueryExpression>("Query");
+            var entities = DataService.GetEntities(query);
 
-            var retriever = serviceProvider.Get<IEntityDataSourceRetrieverService>();
-            var dataSource = retriever.RetrieveEntityDataSource();
-
-            var dataService = GetDataService(service, dataSource);
-
-            var query = context.InputParameterOrDefault<QueryExpression>("Query");
-
-            var entities = dataService.GetEntities(query);
-
-            context.OutputParameters["BusinessEntityCollection"] = entities;
+            PluginExecutionContext.OutputParameters["BusinessEntityCollection"] = entities;
         }
 
-        public abstract IDataService GetDataService(IOrganizationService service, Entity dataSource);
+        public override abstract IDataService GetDataService(IOrganizationService service, Entity dataSource);
     }
 }

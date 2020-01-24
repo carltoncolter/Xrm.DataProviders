@@ -1,27 +1,27 @@
-﻿namespace BGuidinger.Xrm.DataProviders.Dynamics365
-{
-    using Microsoft.Xrm.Sdk.Data.Mappings;
-    using Microsoft.Xrm.Sdk.Metadata;
-    using Microsoft.Xrm.Sdk.Query;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Xrm.Sdk.Data.Mappings;
+using Microsoft.Xrm.Sdk.Metadata;
+using Microsoft.Xrm.Sdk.Query;
 
+namespace CustomDataProviders.AADODataProvider
+{
     public class ODataQueryExpressionVisitor : IQueryExpressionVisitor
     {
-        private Dictionary<string, string> _queryOptions;
         private readonly EntityMap _mapper;
-
-        public string QueryString => _queryOptions.UrlEncode();
+        private readonly Dictionary<string, string> _queryOptions;
 
         public ODataQueryExpressionVisitor(EntityMetadata metadata)
         {
             _mapper = EntityMapFactory.Create(metadata, new DefaultTypeMapFactory(), null);
             _queryOptions = new Dictionary<string, string>
             {
-                { "$count", "true" }
+                {"$count", "true"}
             };
         }
+
+        public string QueryString => _queryOptions.UrlEncode();
 
         public QueryExpression Visit(QueryExpression query)
         {
@@ -40,15 +40,15 @@
                 var columns = columnSet.Columns.Select(x => _mapper.MapAttributeNameExternal(x)).Distinct();
                 _queryOptions.Add("$select", $"{string.Join(",", columns)}");
             }
+
             return columnSet;
         }
 
         private PagingInfo VisitPagingInfo(PagingInfo pageInfo)
         {
             if (pageInfo != null && !string.IsNullOrEmpty(pageInfo.PagingCookie))
-            {
-                _queryOptions.Add("$skiptoken", $"<cookie pagenumber='{pageInfo.PageNumber}' pagingcookie='{pageInfo.PagingCookie}' istracking='False' />");
-            }
+                _queryOptions.Add("$skiptoken",
+                    $"<cookie pagenumber='{pageInfo.PageNumber}' pagingcookie='{pageInfo.PagingCookie}' istracking='False' />");
             return pageInfo;
         }
 
@@ -63,8 +63,10 @@
                     var direction = order.OrderType == OrderType.Descending ? "desc" : "asc";
                     orderBys.Add($"{attribute} {direction}");
                 }
+
                 _queryOptions.Add("$orderby", $"{string.Join(",", orderBys)}");
             }
+
             return orders;
         }
 
@@ -75,17 +77,16 @@
                 var filter = ParseFilter(filterExpression);
                 _queryOptions.Add("$filter", filter);
             }
+
             return filterExpression;
         }
 
         private string ParseFilter(FilterExpression filter)
         {
-            if (!filter.Conditions.Any() && filter.Filters.Count == 1)
-            {
-                return ParseFilter(filter.Filters.Single());
-            }
+            if (!filter.Conditions.Any() && filter.Filters.Count == 1) return ParseFilter(filter.Filters.Single());
 
-            var conditions = filter.Filters.Select(x => ParseFilter(x)).Union(filter.Conditions.Select(x => ParseCondition(x)));
+            var conditions = filter.Filters.Select(x => ParseFilter(x))
+                .Union(filter.Conditions.Select(x => ParseCondition(x)));
             switch (filter.FilterOperator)
             {
                 case LogicalOperator.And:
@@ -102,13 +103,9 @@
             var attribute = _mapper.MapAttributeNameExternal(expression.AttributeName);
             var value = expression.Values.FirstOrDefault();
             if (value is DateTime)
-            {
-                value = $"{((DateTime)value).ToString("yyyy-MM-ddTHH:mm:ssZ")}";
-            }
+                value = $"{((DateTime) value).ToString("yyyy-MM-ddTHH:mm:ssZ")}";
             else
-            {
                 value = "'" + value + "'";
-            }
 
             switch (expression.Operator)
             {
@@ -125,9 +122,9 @@
                 case ConditionOperator.LessEqual:
                     return $"{attribute} le {value}";
                 case ConditionOperator.Like:
-                    return ParseLike(attribute, (string)value);
+                    return ParseLike(attribute, (string) value);
                 case ConditionOperator.NotLike:
-                    return "not " + ParseLike(attribute, (string)value);
+                    return "not " + ParseLike(attribute, (string) value);
                 case ConditionOperator.Contains:
                     return $"contains({attribute}, {value})";
                 case ConditionOperator.DoesNotContain:
@@ -149,7 +146,8 @@
                 case ConditionOperator.Between:
                 case ConditionOperator.NotBetween:
                     var values = string.Join(",", expression.Values.Select(x => $"'{x}'"));
-                    return $"Microsoft.Dynamics.CRM.{expression.Operator}(PropertyName='{attribute}',PropertyValues=[{values}])";
+                    return
+                        $"Microsoft.Dynamics.CRM.{expression.Operator}(PropertyName='{attribute}',PropertyValues=[{values}])";
                 case ConditionOperator.Above:
                 case ConditionOperator.Under:
                 case ConditionOperator.NotUnder:
@@ -181,7 +179,8 @@
                 case ConditionOperator.NotOn:
                 case ConditionOperator.InFiscalYear:
                 case ConditionOperator.InFiscalPeriod:
-                    return $"Microsoft.Dynamics.CRM.{expression.Operator}(PropertyName='{attribute}',PropertyValue={value})";
+                    return
+                        $"Microsoft.Dynamics.CRM.{expression.Operator}(PropertyName='{attribute}',PropertyValue={value})";
                 case ConditionOperator.Yesterday:
                 case ConditionOperator.Today:
                 case ConditionOperator.Tomorrow:
@@ -217,7 +216,8 @@
                 case ConditionOperator.InOrAfterFiscalPeriodAndYear:
                     var value1 = expression.Values?[0];
                     var value2 = expression.Values?[1];
-                    return $"Microsoft.Dynamics.CRM.{expression.Operator}(PropertyName='{attribute}',PropertyValue1={value1},PropertyValue2={value2})";
+                    return
+                        $"Microsoft.Dynamics.CRM.{expression.Operator}(PropertyName='{attribute}',PropertyValue1={value1},PropertyValue2={value2})";
                 //case ConditionOperator.ChildOf:
                 //case ConditionOperator.Mask:
                 //case ConditionOperator.NotMask:
@@ -228,24 +228,16 @@
                     throw new Exception("Operator not implemented: " + expression.Operator);
             }
         }
+
         private string ParseLike(string attribute, string value)
         {
             if (value.StartsWith("'%") && value.EndsWith("%'"))
-            {
                 return $"contains({attribute}, {value})";
-            }
-            else if (value.StartsWith("'%"))
-            {
+            if (value.StartsWith("'%"))
                 return $"endswith({attribute}, {value})";
-            }
-            else if (value.EndsWith("%'"))
-            {
+            if (value.EndsWith("%'"))
                 return $"startswith({attribute}, {value})";
-            }
-            else
-            {
-                throw new Exception("Unkown value: " + value);
-            }
+            throw new Exception("Unkown value: " + value);
         }
     }
 }

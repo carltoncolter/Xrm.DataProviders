@@ -1,4 +1,6 @@
-﻿namespace BGuidinger.Xrm.DataProviders.Dynamics365
+﻿using CustomDataProviders.AADODataProvider;
+
+namespace CustomDataProviders
 {
     using Microsoft.Xrm.Sdk;
     using Microsoft.Xrm.Sdk.Metadata;
@@ -8,7 +10,7 @@
     using System.Net;
     using System.Text;
 
-    public static partial class Extensions
+    public static class Extensions
     {
         public static string UrlEncode(this Dictionary<string, string> parameters)
         {

@@ -1,8 +1,8 @@
-﻿namespace BGuidinger.Xrm.DataProviders
-{
-    using Microsoft.Xrm.Sdk;
-    using Microsoft.Xrm.Sdk.Query;
+﻿using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Sdk.Query;
 
+namespace CustomDataProviders.Interfaces
+{
     public interface IDataService
     {
         EntityCollection GetEntities(QueryExpression query);

@@ -1,22 +1,23 @@
-﻿namespace BGuidinger.Xrm.DataProviders.Dynamics365
-{
-    using Microsoft.Xrm.Sdk;
-    using Microsoft.Xrm.Sdk.Extensions;
-    using Microsoft.Xrm.Sdk.Query;
-    using System.Collections.Generic;
-    using System.Net;
-    using System.Runtime.Serialization.Json;
-    using System.Text.RegularExpressions;
+﻿using System.Collections.Generic;
+using System.Net;
+using System.Runtime.Serialization.Json;
+using System.Text.RegularExpressions;
+using CustomDataProviders.Interfaces;
+using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Sdk.Extensions;
+using Microsoft.Xrm.Sdk.Query;
 
+namespace CustomDataProviders.AADODataProvider
+{
     public class DataService : IDataService
     {
+        private readonly DataSource _dataSource;
         private readonly IOrganizationService _service;
-        private readonly Entity _dataSource;
 
         public DataService(IOrganizationService service, Entity dataSource)
         {
             _service = service;
-            _dataSource = dataSource;
+            _dataSource = new DataSource(dataSource);
         }
 
         public EntityCollection GetEntities(QueryExpression query)
@@ -26,7 +27,7 @@
             var visitor = new ODataQueryExpressionVisitor(metadata);
             visitor.Visit(query);
 
-            var url = $"{_dataSource.GetAttributeValue<string>("bg_resource")}/{metadata.ExternalCollectionName}?{visitor.QueryString}";
+            var url = $"{_dataSource.Resource}/{metadata.ExternalCollectionName}?{visitor.QueryString}";
 
             var records = GetResponse<Records>(GetRequest("GET", url, query.PageInfo?.Count ?? 0));
 
@@ -40,16 +41,10 @@
             {
                 var regex = new Regex("pagingcookie='(.*?)'");
                 var match = regex.Match(WebUtility.UrlDecode(records.NextLink));
-                if (match.Success)
-                {
-                    entities.PagingCookie = match.Groups[1].Value;
-                }
+                if (match.Success) entities.PagingCookie = match.Groups[1].Value;
             }
 
-            foreach (var record in records.Value)
-            {
-                entities.Entities.Add(record.ToEntity(metadata));
-            }
+            foreach (var record in records.Value) entities.Entities.Add(record.ToEntity(metadata));
 
             return entities;
         }
@@ -58,7 +53,7 @@
         {
             var metadata = _service.GetEntityMetadata(reference.LogicalName);
 
-            var url = $"{_dataSource.GetAttributeValue<string>("bg_resource")}/{metadata.ExternalCollectionName}({reference.Id.ToString("D")})";
+            var url = $"{_dataSource.Resource}/{metadata.ExternalCollectionName}({reference.Id.ToString("D")})";
 
             var record = GetResponse<Record>(GetRequest("GET", url));
 
@@ -67,19 +62,15 @@
 
         public Token GetToken()
         {
-            var resource = _dataSource.GetAttributeValue<string>("bg_resource");
-            var username = _dataSource.GetAttributeValue<string>("bg_username");
-            var password = _dataSource.GetAttributeValue<string>("bg_password");
+            var uri = "https://login.microsoftonline.com/common/oauth2/token";
 
-            var uri = $"https://login.microsoftonline.com/common/oauth2/token";
-
-            var parameters = new Dictionary<string, string>()
+            var parameters = new Dictionary<string, string>
             {
                 ["grant_type"] = "password",
-                ["client_id"] = "2ad88395-b77d-4561-9441-d0e40824f9bc",
-                ["resource"] = resource,
-                ["username"] = username,
-                ["password"] = password,
+                ["client_id"] = _dataSource.ClientId,
+                ["resource"] = _dataSource.Resource,
+                ["username"] = _dataSource.Username,
+                ["password"] = _dataSource.Password
             };
 
             var request = WebRequest.CreateHttp(uri);
@@ -100,10 +91,7 @@
             request.Headers.Add("Authorization", $"Bearer {token.AccessToken}");
             request.Headers.Add("OData-MaxVersion", "4.0");
             request.Headers.Add("OData-Version", "4.0");
-            if (pageSize != null)
-            {
-                request.Headers.Add("Prefer", $"odata.maxpagesize={pageSize}");
-            }
+            if (pageSize != null) request.Headers.Add("Prefer", $"odata.maxpagesize={pageSize}");
 
             // TODO: Handle URL's over 2048 characters.
 
@@ -115,12 +103,12 @@
             using (var response = request.GetResponse())
             using (var stream = response.GetResponseStream())
             {
-                var settings = new DataContractJsonSerializerSettings()
+                var settings = new DataContractJsonSerializerSettings
                 {
                     UseSimpleDictionaryFormat = true
                 };
                 var serializer = new DataContractJsonSerializer(typeof(TResponse), settings);
-                return (TResponse)serializer.ReadObject(stream);
+                return (TResponse) serializer.ReadObject(stream);
             }
         }
     }

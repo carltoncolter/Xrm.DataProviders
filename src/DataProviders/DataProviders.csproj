@@ -7,8 +7,8 @@
     <ProjectGuid>{E3103788-D42C-4001-9629-45E869AFF5B9}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BGuidinger.Xrm.DataProviders</RootNamespace>
-    <AssemblyName>BGuidinger.Xrm.DataProviders</AssemblyName>
+    <RootNamespace>CustomDataProviders.AADODataProvider</RootNamespace>
+    <AssemblyName>CustomDataProviders.AADODataProvider</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -72,22 +72,25 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Providers\PasswordProtected\Extensions.cs" />
-    <Compile Include="Base\Interfaces\IDataService.cs" />
+    <Compile Include="Base\PluginBase.cs" />
+    <Compile Include="Shared\Extensions.cs" />
+    <Compile Include="Interfaces\IDataService.cs" />
     <Compile Include="Base\RetrieveMultipleBase.cs" />
     <Compile Include="Base\RetrieveBase.cs" />
-    <Compile Include="Providers\PasswordProtected\Models\Record.cs" />
-    <Compile Include="Providers\PasswordProtected\Models\Records.cs" />
-    <Compile Include="Providers\PasswordProtected\Models\Token.cs" />
+    <Compile Include="Providers\AADProvider\Models\DataSource.cs" />
+    <Compile Include="Providers\AADProvider\Models\Record.cs" />
+    <Compile Include="Providers\AADProvider\Models\Records.cs" />
+    <Compile Include="Providers\AADProvider\Models\Token.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Providers\PasswordProtected\Services\DataService.cs" />
-    <Compile Include="Providers\PasswordProtected\Retrieve.cs" />
-    <Compile Include="Providers\PasswordProtected\RetrieveMultiple.cs" />
-    <Compile Include="Providers\PasswordProtected\Visitors\ODataQueryExpressionVisitor.cs" />
+    <Compile Include="Providers\AADProvider\Services\DataService.cs" />
+    <Compile Include="Providers\AADProvider\Retrieve.cs" />
+    <Compile Include="Providers\AADProvider\RetrieveMultiple.cs" />
+    <Compile Include="Providers\AADProvider\Visitors\ODataQueryExpressionVisitor.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="key.snk" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
